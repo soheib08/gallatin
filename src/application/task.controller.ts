@@ -22,8 +22,6 @@ export class TaskController implements GrpcService {
   @GrpcMethod('TasksService', 'CreateTask')
   async createTask(data: CreateTaskRequest) {
     try {
-      console.log('controller', data);
-
       return this.commandBus.execute(
         new CreateTaskCommand(data.title, data.description, data.parent),
       );
