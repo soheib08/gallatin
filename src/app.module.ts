@@ -11,7 +11,9 @@ import { TaskDeletedEventHandler } from './domain/event/task-deleted.event';
 import { TaskListEventHandler } from './domain/event/task-list.event';
 import { TaskListHandler } from './application/handler/get-tasks.handler';
 import { ITaskRepository } from './domain/interface/task.repository.interface';
-import { TaskRepository } from './infrastructure/task-repository';
+import { TaskRepository } from './infrastructure/repository/task-repository';
+import { validate } from './infrastructure/config/app.configuration';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 export const QueryHandlers = [TaskListHandler];
 export const CommandHandlers = [CreateTaskHandler, DeleteTaskHandler];
@@ -23,17 +25,25 @@ export const EventHandlers = [
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: '54.37.137.106',
-      port: 5432,
-      password: 'changeme',
-      username: 'postgres',
-      entities: [Task],
-      database: 'sternx',
-      synchronize: true,
-      logging: true,
-      ssl: false,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate: validate,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('DATABASE_HOST'),
+        port: configService.get('DATABASE_PORT'),
+        password: configService.get('DATABASE_PASSWORD'),
+        username: configService.get('DATABASE_USERNAME'),
+        database: configService.get('DATABASE_NAME'),
+        entities: [Task],
+        synchronize: true,
+        logging: true,
+        ssl: false,
+      }),
+      inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([Task]),
     CqrsModule,
@@ -42,7 +52,7 @@ export const EventHandlers = [
         name: 'TASK_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://127.0.0.1:5672'],
+          urls: [process.env.RABBIT_URL],
           queue: 'logs',
           queueOptions: {
             durable: false,

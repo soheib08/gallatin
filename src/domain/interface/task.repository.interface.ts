@@ -3,7 +3,7 @@ import { TaskModel } from '../model/task.model';
 export interface ITaskRepository {
   createOne(task: TaskModel): Promise<TaskModel>;
   deleteOne(id: string): Promise<void>;
-  exist(query): Promise<boolean>;
+  findOne(id: string): Promise<TaskModel>;
   findAndCount(
     page: number,
     limit: number,

@@ -13,7 +13,6 @@ export class TaskDeletedEventHandler
   constructor(@Inject('TASK_SERVICE') private client: ClientProxy) {}
 
   handle(event: TaskDeletedEvent) {
-    console.log(event);
     this.client.emit<number>('task_deleted', new TaskDeletedEvent());
   }
 }

@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { CreateTaskCommand } from '../domain/command/create-task.command';
 import { DeleteTaskCommand } from '../domain/command/delete-task.command';
 import { TaskListQuery } from '../domain/query/get-tasks';
@@ -21,14 +21,21 @@ export class TaskController implements GrpcService {
 
   @GrpcMethod('TasksService', 'CreateTask')
   async createTask(data: CreateTaskRequest) {
-    return this.commandBus.execute(
-      new CreateTaskCommand(data.parent, data.title, data.description),
-    );
+    try {
+      console.log('controller', data);
+
+      return this.commandBus.execute(
+        new CreateTaskCommand(data.title, data.description, data.parent),
+      );
+    } catch (err) {
+      return new RpcException('parent not found');
+    }
   }
 
   @GrpcMethod('TasksService', 'DeleteTask')
   async deleteTask(data: DeleteTaskRequest) {
     this.commandBus.execute(new DeleteTaskCommand(data.id));
+    return { ok: true };
   }
 
   @GrpcMethod('TasksService', 'TaskList')

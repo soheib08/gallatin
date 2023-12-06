@@ -24,6 +24,6 @@ export interface Task {
 
 export interface GrpcService {
   createTask(data: CreateTaskRequest): Promise<TaskDto>;
-  deleteTask(data: DeleteTaskRequest): Promise<void>;
+  deleteTask(data: DeleteTaskRequest): Promise<{ ok: boolean }>;
   taskList(data: TaskListRequest): Promise<TaskListDto>;
 }

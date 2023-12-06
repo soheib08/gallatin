@@ -5,6 +5,8 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -12,8 +14,12 @@ export class Task {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @ManyToOne((type) => Task, { onDelete: 'CASCADE', nullable: true })
+  @JoinColumn({ name: 'parentId' })
+  parent?: Task;
+
   @Column({ nullable: true })
-  parentId: string;
+  parentId?: string;
 
   @Column()
   title: string;
