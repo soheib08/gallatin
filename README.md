@@ -1,4 +1,4 @@
-# Supnex-challenge
+# SternX-challenge
 
 Description of galltin microservice.
 
