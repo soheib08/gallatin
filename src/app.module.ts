@@ -1,9 +1,25 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Task } from './tasks/infrastructure/entity/task.entity';
-import { TaskModule } from './tasks/task.module';
+import { Task } from './infrastructure/entity/task.entity';
+import { CqrsModule } from '@nestjs/cqrs';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { TaskController } from './application/task.controller';
+import { CreateTaskHandler } from './application/handler/create-task.handler';
+import { DeleteTaskHandler } from './application/handler/delete-task.handler';
+import { TaskCreatedEventHandler } from './domain/event/task-created.event';
+import { TaskDeletedEventHandler } from './domain/event/task-deleted.event';
+import { TaskListEventHandler } from './domain/event/task-list.event';
+import { TaskListHandler } from './application/handler/get-tasks.handler';
+import { ITaskRepository } from './domain/interface/task.repository.interface';
+import { TaskRepository } from './infrastructure/task-repository';
+
+export const QueryHandlers = [TaskListHandler];
+export const CommandHandlers = [CreateTaskHandler, DeleteTaskHandler];
+export const EventHandlers = [
+  TaskCreatedEventHandler,
+  TaskDeletedEventHandler,
+  TaskListEventHandler,
+];
 
 @Module({
   imports: [
@@ -19,9 +35,28 @@ import { TaskModule } from './tasks/task.module';
       logging: true,
       ssl: false,
     }),
-    TaskModule,
+    TypeOrmModule.forFeature([Task]),
+    CqrsModule,
+    ClientsModule.register([
+      {
+        name: 'TASK_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://127.0.0.1:5672'],
+          queue: 'logs',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [TaskController],
+  providers: [
+    ...CommandHandlers,
+    ...QueryHandlers,
+    ...EventHandlers,
+    { provide: ITaskRepository, useClass: TaskRepository },
+  ],
 })
 export class AppModule {}

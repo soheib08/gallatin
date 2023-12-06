@@ -6,7 +6,13 @@ export class TaskModel {
   readonly createdAt: Date;
   readonly updatedAt: Date;
 
-  constructor(title: string, description: string, parentId?: string) {
+  constructor(
+    id: string,
+    title: string,
+    description: string,
+    parentId?: string,
+  ) {
+    this.id = id;
     this.title = title;
     this.description = description;
     this.parentId = parentId ? parentId : null;

@@ -16,6 +16,8 @@ export class TaskCreatedEventHandler
   constructor(@Inject('TASK_SERVICE') private client: ClientProxy) {}
 
   handle(event: TaskCreatedEvent) {
+    console.log(event);
+
     this.client.emit<number>(
       'task_created',
       new TaskCreatedEvent(event.taskId, event.taskName),

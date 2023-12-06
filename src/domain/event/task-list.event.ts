@@ -11,6 +11,8 @@ export class TaskListEventHandler implements IEventHandler<TaskListEvent> {
   constructor(@Inject('TASK_SERVICE') private client: ClientProxy) {}
 
   handle(event: TaskListEvent) {
+    console.log(event);
+
     this.client.emit<number>('task_list', new TaskListEvent());
   }
 }

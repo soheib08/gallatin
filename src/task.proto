@@ -17,11 +17,11 @@ message CreateTaskRequest {
 }
 
 message TaskById {
-  int32 id = 1;
+  string id = 1;
 }
 
 message Task {
-  int32 id = 1;
+  string id = 1;
   string title = 2;
   string parent = 3;
   string description = 4;
@@ -35,6 +35,6 @@ message TaskListRequest{
 }
 
 message TaskListDto {
-  int32 total = 1;
-  repeated Task items=2;
+  repeated Task items=1;
+  int32 total = 2;
 }
