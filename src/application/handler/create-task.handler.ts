@@ -17,30 +17,20 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
   ) {}
 
   async execute(command: CreateTaskCommand): Promise<TaskDto> {
-    console.log('handler', command);
-
+    let foundParent;
     if (command.parentId) {
-      let foundParent = await this.taskRepository.findOne(command.parentId);
+      foundParent = await this.taskRepository.findOne(command.parentId);
       if (!foundParent) throw new RpcException('parent task not found');
-
-      const task = new TaskModel(
-        v4(),
-        command.title,
-        command.description,
-        foundParent,
-      );
-      let savedTask = await this.taskRepository.createOne(task);
-      console.log('here1', savedTask);
-      return savedTask;
-    } else {
-      const task = new TaskModel(v4(), command.title, command.description);
-      let savedTask = await this.taskRepository.createOne(task);
-
-      this.eventBus.publish(
-        new TaskCreatedEvent(savedTask.id, savedTask.title),
-      );
-      console.log('here2', savedTask);
-      return savedTask;
     }
+
+    const task = new TaskModel(
+      v4(),
+      command.title,
+      command.description,
+      foundParent,
+    );
+    let savedTask = await this.taskRepository.createOne(task);
+    this.eventBus.publish(new TaskCreatedEvent());
+    return savedTask;
   }
 }
